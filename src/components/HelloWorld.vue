@@ -1,58 +1,111 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+    <v-app id="inspire">
+        <v-app-bar app color="white" flat>
+            <v-container class="py-0 fill-height">
+                <v-avatar
+                    class="mr-10"
+                    color="grey darken-1"
+                    size="32"
+                ></v-avatar>
+
+                <v-btn v-for="link in links" :key="link" text>
+                    {{ link }}
+                </v-btn>
+
+                <v-spacer></v-spacer>
+
+                <v-responsive max-width="260">
+                    <v-text-field
+                        dense
+                        flat
+                        hide-details
+                        rounded
+                        solo-inverted
+                    ></v-text-field>
+                </v-responsive>
+            </v-container>
+        </v-app-bar>
+
+        <v-main class="grey lighten-3">
+            <v-container>
+                <v-row>
+                    <v-col>
+                        <v-sheet min-height="70vh" rounded="lg">
+                            <!--  -->
+                            <div class="container">
+                                <div class="row">
+                                    <div
+                                        class="col col-4"
+                                        v-for="latestNew in latestNews"
+                                        v-bind:key="latestNew.id"
+                                    >
+                                        <v-card class="mx-auto" max-width="344">
+                                            <v-img
+                                                :src="latestNew.urlToImage"
+                                                height="200px"
+                                            ></v-img>
+
+                                            <v-card-title>
+                                                {{ latestNew.title }}
+                                            </v-card-title>
+
+                                            <v-card-subtitle>
+                                                {{ latestNew.description }}
+                                            </v-card-subtitle>
+
+                                            <v-card-actions>
+                                                <v-btn
+                                                    color="orange lighten-2"
+                                                    text
+                                                    :href="latestNew.url"
+                                                    target="_blank"
+                                                >
+                                                    {{ latestNew.author }}
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </div>
+                                </div>
+                            </div>
+                        </v-sheet>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-main>
+    </v-app>
 </template>
 
 <script>
+import axios from "axios";
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+    data: () => ({
+        show: false,
+        links: ["Anasayfa", "Dünyadan", "Spor", "Updates"],
+        latestNews: null,
+        loading: true,
+        errored: false,
+    }),
+    created: function() {
+        axios
+            .get(
+                "https://newsapi.org/v2/top-headlines?country=tr&apiKey=c524fd11899e40358afec60bd7d0f87b"
+            )
+            .then((res) => {
+                let fullArticles = res.data.articles.filter(
+                    (article) =>
+                        article.author &&
+                        article.url &&
+                        article.description &&
+                        article.title
+                );
+                this.latestNews = fullArticles;
+                console.log(fullArticles);
+            })
+            .catch((error) => {
+                console.log(error);
+                this.errored = true;
+            })
+            .finally(() => (this.loading = false));
+    },
+};
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
