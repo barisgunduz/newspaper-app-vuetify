@@ -8,7 +8,12 @@
                     size="32"
                 ></v-avatar>
 
-                <v-btn v-for="link in links" :key="link" text>
+                <v-btn
+                    v-for="link in links"
+                    :key="link"
+                    text
+                    @click="click(link)"
+                >
                     {{ link }}
                 </v-btn>
 
@@ -28,6 +33,7 @@
 
         <v-main class="grey lighten-3">
             <v-container>
+                {{ countryCode }}
                 <v-row>
                     <v-col>
                         <v-sheet min-height="70vh" rounded="lg">
@@ -84,28 +90,43 @@ export default {
         latestNews: null,
         loading: true,
         errored: false,
+        countryCode: "tr",
     }),
+    constructor() {
+        this.click.bind(this);
+    },
     created: function() {
-        axios
-            .get(
-                "https://newsapi.org/v2/top-headlines?country=tr&apiKey=c524fd11899e40358afec60bd7d0f87b"
-            )
-            .then((res) => {
-                let fullArticles = res.data.articles.filter(
-                    (article) =>
-                        article.author &&
-                        article.url &&
-                        article.description &&
-                        article.title
-                );
-                this.latestNews = fullArticles;
-                console.log(fullArticles);
-            })
-            .catch((error) => {
-                console.log(error);
-                this.errored = true;
-            })
-            .finally(() => (this.loading = false));
+        this.getNewsApiCall();
+    },
+    methods: {
+        getNewsApiCall() {
+            const url = `https://newsapi.org/v2/top-headlines?country=${this.countryCode}&apiKey=c524fd11899e40358afec60bd7d0f87b`;
+            axios
+                .get(url)
+                .then((res) => {
+                    let fullArticles = res.data.articles.filter(
+                        (article) =>
+                            article.author &&
+                            article.url &&
+                            article.description &&
+                            article.title
+                    );
+                    this.latestNews = fullArticles;
+                    console.log(fullArticles);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    this.errored = true;
+                })
+                .finally(() => (this.loading = false));
+        },
+        click: (link) => {
+            console.log("click e basıldı");
+            console.log(link);
+            if (link == "Dünyadan") {
+                console.log("dünyadana tıklamışız");
+            }
+        },
     },
 };
 </script>
